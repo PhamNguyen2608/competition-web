@@ -2,5 +2,82 @@
   "competition": {
     "join": "Join",
     "rules": "Rules"
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Login with your email",
+    "email": "Email",
+    "emailPlaceholder": "Enter email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submit": "Login",
+    "invalidEmail": "Please enter a valid email",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "unknownError": "Unknown login error",
+    "noAccount": "Don't have an account?",
+    "register": "Register now"
+  },
+  "register": {
+    "title": "Register Account",
+    "name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Register",
+    "invalidEmail": "Please enter a valid email",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "nameRequired": "Please enter your name",
+    "unknownError": "Unknown registration error",
+    "existingAccount": "Already have an account? Login here",
+    "accountExists": "An account with this email already exists"
+  },
+  "guidelines": {
+    "title": "GUIDELINES",
+    "understood": "Understood"
+  },
+  "exam": {
+    "title": "Online Exam",
+    "time": {
+      "label": "Time",
+      "value": "45 minutes"
+    },
+    "questions": {
+      "label": "Questions",
+      "value": "30 questions"
+    },
+    "passingScore": {
+      "label": "Passing Score",
+      "value": "≥ 80/100"
+    },
+    "importantNotes": {
+      "title": "Important Notes:"
+    },
+    "startButton": "Start Exam",
+    "startHint": "Click \"Start Exam\" when you are ready",
+    "loading": "Loading exam content..."
+  },
+  "quiz": {
+    "progress": {
+      "title": "Progress",
+      "count": "questions"
+    },
+    "navigation": {
+      "previous": "Previous Question",
+      "next": "Next Question",
+      "submit": "Submit Exam"
+    },
+    "submitted": "Exam has been submitted!",
+    "question": {
+      "number": "Question {{number}}",
+      "status": {
+        "answered": "Selected {{answer}}",
+        "unanswered": "Not answered"
+      }
+    }
+  },
+  "registrationSuccess": {
+    "title": "Registration Successful!",
+    "phoneMessage": "You have successfully registered with phone number:",
+    "loginPrompt": "Please login to continue using the service.",
+    "loginButton": "Login Now"
   }
 } 

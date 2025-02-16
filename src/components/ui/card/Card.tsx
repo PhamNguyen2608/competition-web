@@ -1,4 +1,4 @@
-import { cn } from "../../lib/utils"
+import { cn } from "../../../lib/utils"
 import { forwardRef } from "react"
 
 type CardProps = {
@@ -15,7 +15,7 @@ type CardProps = {
   bodyClassName?: string
 } & React.HTMLAttributes<HTMLDivElement>
 
-export const Card = forwardRef<HTMLDivElement, CardProps>(
+const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, image, header, footer, children, bodyClassName, ...props }, ref) => {
     return (
       <div
@@ -51,3 +51,5 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
   }
 )
 Card.displayName = "Card"
+
+export { Card } 

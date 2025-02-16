@@ -1,98 +1,155 @@
-interface User {
-  id: string;
-  email?: string;
-  phone?: string;
-  name: string;
-  role: 'user' | 'admin';
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  User as FirebaseUser,
+  updateProfile,
+  fetchSignInMethodsForEmail,
+  deleteUser,
+  getAuth,
+} from "firebase/auth";
+import { doc, setDoc, getDoc,collection, query, where, getDocs, writeBatch } from "firebase/firestore";
+import { auth, db } from '../config/firebase.config';
+import { AppUser, RegisterPayload } from '@/types/auth';
+
+interface LoginResult {
+  success: boolean;
+  user?: AppUser;
+  message?: string;
 }
 
 class AuthService {
-  private currentUser: User | null = null;
-  private fakeDelay = 500; // Giả lập độ trễ network
-
-  // Giả lập lưu trữ user trong localStorage
-  private persistUser(user: User | null) {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
+  public async firebaseUserToUser(firebaseUser: FirebaseUser): Promise<AppUser> {
+    const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+    
+    if (!userDoc.exists()) {
+      await this.logout();
+      throw new Error('Tài khoản không tồn tại trong hệ thống');
     }
+    
+    return {
+      uid: firebaseUser.uid,
+      email: firebaseUser.email,
+      phoneNumber: firebaseUser.phoneNumber,
+      displayName: firebaseUser.displayName || '',
+      emailVerified: firebaseUser.emailVerified,
+      role: userDoc.data()?.role || 'user',
+      providerId: firebaseUser.providerId
+    };
   }
 
-  // Giả lập lấy user từ localStorage
-  private loadPersistedUser(): User | null {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  }
-
-  async login(identifier: string, password: string): Promise<User> {
-    await new Promise(resolve => setTimeout(resolve, this.fakeDelay));
-
-    // Admin with phone login
-    if ((identifier === 'admin@example.com' || identifier === '+84123456789') && password === 'admin123') {
-      const user: User = {
-        id: '1',
-        email: 'admin@example.com',
-        phone: '+84123456789',
-        name: 'Admin User',
-        role: 'admin'
-      };
-      this.currentUser = user;
-      this.persistUser(user);
-      return user;
+  async login(phoneNumber: string, password: string): Promise<LoginResult> {
+    try {
+      const email = `${phoneNumber}@gmail.com`;
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Lấy document của user trong Firestore
+      const userDocRef = doc(db, "users", firebaseUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      // Nếu không tìm thấy document, đăng xuất và báo lỗi
+      if (!userDoc.exists()) {
+        await this.logout();
+        return { 
+          success: false, 
+          message: "Tài khoản không tồn tại trong hệ thống" 
+        };
+      }
+      
+      // Lấy token mới và lưu vào localStorage
+      const token = await firebaseUser.getIdToken();
+      localStorage.setItem('auth_token', token);
+      
+      const appUser = await this.firebaseUserToUser(firebaseUser);
+      return { success: true, user: appUser };
+    } catch (error: any) {
+      console.error("Login error:", error);
+      
+      // Xác định thông báo lỗi phù hợp dựa trên mã lỗi Firebase
+      let errorMessage = "Lỗi đăng nhập không xác định";
+      if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+        errorMessage = "Số điện thoại hoặc mật khẩu không đúng";
+      }
+      
+      // Xóa trạng thái auth (nếu có) để đảm bảo không giữ lại thông tin không hợp lệ
+      await this.logout();
+      
+      return { success: false, message: errorMessage };
     }
-
-    // Regular user phone login (example)
-    if (identifier === '+84987654321' && password === 'user123') {
-      const user: User = {
-        id: '2',
-        phone: '+84987654321',
-        name: 'Phone User',
-        role: 'user'
-      };
-      this.currentUser = user;
-      this.persistUser(user);
-      return user;
-    }
-
-    throw new Error('Invalid credentials');
   }
+  
 
   async logout(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, this.fakeDelay));
-    this.currentUser = null;
-    this.persistUser(null);
+    await signOut(auth);
+    localStorage.removeItem('auth_token'); // Xóa token khi logout
   }
 
-  async getCurrentUser(): Promise<User | null> {
-    // Nếu đã có user trong memory, return luôn
-    if (this.currentUser) {
-      return this.currentUser;
-    }
-
-    // Thử load từ localStorage
-    const persistedUser = this.loadPersistedUser();
-    if (persistedUser) {
-      this.currentUser = persistedUser;
-      return persistedUser;
-    }
-
-    return null;
-  }
-
-  async register(data: { phone: string; password: string; name: string }): Promise<User> {
-    await new Promise(resolve => setTimeout(resolve, this.fakeDelay));
+  async getCurrentUser(): Promise<AppUser | null> {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return null;
     
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      phone: data.phone,
-      name: data.name,
-      role: 'user'
-    };
+    return this.firebaseUserToUser(currentUser);
+  }
 
-    this.currentUser = newUser;
-    this.persistUser(newUser);
-    return newUser;
+  async register(data: RegisterPayload): Promise<void> {
+    try {
+      const email = `${data.phoneNumber}@gmail.com`;
+      
+      // Check if email exists
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      if (signInMethods.length > 0) {
+        throw new Error('Số điện thoại này đã được đăng ký');
+      }
+
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        data.password
+      );
+
+      // Create user document in Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        phoneNumber: data.phoneNumber,
+        displayName: data.name,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      });
+
+      // Update profile
+      await updateProfile(userCredential.user, {
+        displayName: data.name
+      });
+
+      // Immediately sign out and clear any auth state
+      await this.logout();
+      localStorage.removeItem('auth_token');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  }
+
+  public async validateUserInDatabase(uid: string): Promise<boolean> {
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      return userDoc.exists();
+    } catch (error) {
+      console.error('Error validating user:', error);
+      return false;
+    }
+  }
+
+  public async fullDeleteUser(uid: string): Promise<void> {
+    // Xóa trong Authentication
+    await deleteUser(await getAuth().currentUser!);
+    
+    // Xóa trong Firestore
+    const batch = writeBatch(db);
+    batch.delete(doc(db, "users", uid));
+    await batch.commit();
   }
 }
 

@@ -3,8 +3,8 @@ import { Leaderboard } from "./leaderboard"
 import type { LeaderboardEntry } from "./types"
 
 export function LeaderboardCard() {
-  // This would typically come from an API or props
-  const leaderboardData: LeaderboardEntry[] | undefined =  [
+  // Mock data - should be moved to a separate file or fetched from API
+  const leaderboardData: LeaderboardEntry[] = [
     {
       position: 1,
       player: {
@@ -14,7 +14,7 @@ export function LeaderboardCard() {
       },
       reward: {
         value: 150000,
-        trend: "up",
+        trend: "up" as const,
       },
       points: 20284,
     },
@@ -27,7 +27,7 @@ export function LeaderboardCard() {
       },
       reward: {
         value: 150000,
-        trend: "up",
+        trend: "up" as const,
       },
       points: 14233,
     },
@@ -40,7 +40,7 @@ export function LeaderboardCard() {
       },
       reward: {
         value: 145000,
-        trend: "up",
+        trend: "up" as const,
       },
       points: 13300,
     },
@@ -53,7 +53,7 @@ export function LeaderboardCard() {
       },
       reward: {
         value: 145000,
-        trend: "down",
+        trend: "down" as const,
       },
       points: 12532,
     },
@@ -66,21 +66,33 @@ export function LeaderboardCard() {
       },
       reward: {
         value: 75,
-        trend: "up",
+        trend: "up" as const,
       },
       points: 11045,
     },
-  ]
+  ].map(entry => ({
+    ...entry,
+    player: {
+      ...entry.player,
+      avatar: `/placeholder.svg?height=32&width=32&seed=${entry.player.name}`, // Make avatars unique
+      timestamp: new Date(entry.player.timestamp).toISOString(), // Ensure consistent date format
+    }
+  }));
+
+  if (!leaderboardData?.length) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-xl font-bold text-red-800 mb-4 font-display">BẢNG XẾP HẠNG</h2>
+        <div className="text-center text-gray-500">Chưa có dữ liệu bảng xếp hạng</div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
       <h2 className="text-xl font-bold text-red-800 mb-4 font-display">BẢNG XẾP HẠNG</h2>
-      {leaderboardData && leaderboardData.length > 0 ? (
-        <Leaderboard entries={leaderboardData} />
-      ) : (
-        <div className="text-center text-gray-500">Chưa có dữ liệu bảng xếp hạng</div>
-      )}
+      <Leaderboard entries={leaderboardData} />
     </Card>
-  )
+  );
 }
 

@@ -1,3 +1,5 @@
+// ./types.ts
+
 export interface Player {
   name: string
   avatar?: string
@@ -18,4 +20,4 @@ export interface LeaderboardEntry {
 
 export interface LeaderboardProps {
   entries?: LeaderboardEntry[]
-} 
+}

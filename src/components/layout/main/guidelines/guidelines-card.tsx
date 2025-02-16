@@ -2,15 +2,18 @@ import { Card } from "../../../ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../ui/accordion"
 import { GUIDELINES } from "../../../../lib/constants"
 import { CustomButton } from "../../../ui/button"
+import { useTranslation } from "react-i18next"
 
 interface GuidelinesCardProps {
-  onClose?: () => void;
+  readonly onClose?: () => void;
 }
 
 export function GuidelinesCard({ onClose }: GuidelinesCardProps) {
+  const { t } = useTranslation()
+  
   return (
     <Card className="p-6 max-h-[80vh] overflow-y-auto">
-      <h2 className="text-xl font-bold text-red-800 mb-4 font-display">HƯỚNG DẪN</h2>
+      <h2 className="text-xl font-bold text-red-800 mb-4 font-display">{t('guidelines.title')}</h2>
       <Accordion type="single" collapsible>
         {GUIDELINES.map((item) => (
           <AccordionItem key={item.id} value={item.id}>
@@ -30,7 +33,7 @@ export function GuidelinesCard({ onClose }: GuidelinesCardProps) {
           color="primary" 
           className="mt-4 w-full"
         >
-          Đã hiểu
+          {t('guidelines.understood')}
         </CustomButton>
       )}
     </Card>

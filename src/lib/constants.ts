@@ -6,10 +6,14 @@ export const SITE_CONFIG = {
   
   export const NAV_ITEMS = [
     { label: "Trang chủ", href: "/" },
-    { label: "Thể lệ", href: "/rules" },
-    { label: "Bảng xếp hạng", href: "/leaderboard" },
-    { label: "Đăng nhập", href: "/login" },
+    { label: "Hướng dẫn", href: "#guidelines" },
+    { label: "Bảng xếp hạng", href: "#leaderboard" },
   ]
+  
+  export const AUTH_NAV_ITEMS = {
+    authenticated: { label: "Đăng xuất", href: "#", isLogout: true },
+    unauthenticated: { label: "Đăng nhập", href: "/login" }
+  }
   
   export const TIMER_UNITS = ["Ngày", "Giờ", "Phút", "Giây"]
   
@@ -35,5 +39,12 @@ export const SITE_CONFIG = {
       content: "[Nội dung về bảo mật thông tin]",
     },
   ]
+  
+  export const EXAM_RULES = [
+    "Thí sinh có 45 phút để hoàn thành bài thi",
+    "Không được phép tham khảo tài liệu",
+    "Mỗi câu hỏi chỉ được chọn một đáp án", 
+    "Hệ thống sẽ tự động nộp bài khi hết thời gian"
+  ] as const;
   
   

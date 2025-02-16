@@ -2,5 +2,92 @@
   "competition": {
     "join": "Tham gia",
     "rules": "Thể lệ"
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "subtitle": "Đăng nhập bằng số điện thoại",
+    "phone": "Số điện thoại",
+    "phonePlaceholder": "Nhập số điện thoại",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "submit": "Đăng nhập",
+    "invalidPhone": "Vui lòng nhập số điện thoại 10 chữ số",
+    "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+    "unknownError": "Lỗi đăng nhập không xác định",
+    "noAccount": "Chưa có tài khoản?",
+    "register": "Đăng ký ngay"
+  },
+  "register": {
+    "title": "Đăng ký tài khoản",
+    "name": "Họ và tên",
+    "phone": "Số điện thoại",
+    "phonePlaceholder": "Nhập số điện thoại",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "submit": "Đăng ký",
+    "invalidPhone": "Vui lòng nhập số điện thoại 10 chữ số",
+    "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+    "nameRequired": "Vui lòng nhập họ tên",
+    "unknownError": "Lỗi đăng ký không xác định",
+    "existingAccount": "Đã có tài khoản? Đăng nhập tại đây",
+    "accountExists": "Số điện thoại này đã được đăng ký"
+  },
+  "guidelines": {
+    "title": "HƯỚNG DẪN",
+    "understood": "Đã hiểu"
+  },
+  "exam": {
+    "title": "Bài thi trực tuyến",
+    "time": {
+      "label": "Thời gian",
+      "value": "45 phút"
+    },
+    "questions": {
+      "label": "Số câu hỏi",
+      "value": "30 câu"
+    },
+    "passingScore": {
+      "label": "Điểm đạt",
+      "value": "≥ 80/100"
+    },
+    "importantNotes": {
+      "title": "Lưu ý quan trọng"
+    },
+    "startButton": "Bắt đầu làm bài",
+    "startHint": "Bấm \"Bắt đầu làm bài\" khi bạn đã sẵn sàng",
+    "loading": "Nội dung bài thi đang được tải..."
+  },
+  "quiz": {
+    "progress": {
+      "title": "Tiến độ làm bài",
+      "count": "câu"
+    },
+    "navigation": {
+      "previous": "Câu hỏi trước",
+      "next": "Câu hỏi sau",
+      "submit": "Nộp bài thi"
+    },
+    "submitted": "Bài thi đã được nộp!",
+    "question": {
+      "number": "Câu {{number}}",
+      "status": {
+        "answered": "Đã chọn {{answer}}",
+        "unanswered": "Chưa làm"
+      }
+    },
+    "warning": {
+      "leaveTitle": "Rời khỏi bài thi?",
+      "leaveContent": "Bạn đã làm {{answered}}/{{total}} câu. Bạn có chắc chắn muốn rời khỏi bài thi không?",
+      "submitTitle": "Nộp bài thi?",
+      "submitContent": "Bạn mới chỉ làm {{answered}}/{{total}} câu. Bạn có chắc chắn muốn nộp bài không?",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
+    }
+  },
+  "registrationSuccess": {
+    "title": "Đăng ký thành công!",
+    "phoneMessage": "Bạn đã đăng ký thành công với số điện thoại:",
+    "loginPrompt": "Vui lòng đăng nhập để tiếp tục sử dụng dịch vụ.",
+    "loginButton": "Đăng nhập ngay"
   }
 } 
