@@ -3,12 +3,15 @@ import { NAV_ITEMS, AUTH_NAV_ITEMS } from "../../../../lib/constants"
 import { useAppSelector, useAppDispatch } from "../../../../store/hooks"
 import AuthService from "../../../../services/authService"
 import { logout } from "../../../../features/auth/authSlice"
-// import SeedButton from "../../../../components/SeedButton"
+import { useState } from "react"
+import { RewardStructurePortal } from "../../main/RewardStructurePortal"
+import SeedButton from "../../../../components/SeedButton"
 
 export function Header() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { user } = useAppSelector(state => state.auth)
+  const [showRewards, setShowRewards] = useState(false)
 
   const handleAuthAction = async () => {
     if (user) {
@@ -55,22 +58,31 @@ export function Header() {
           <Link to="/" className="flex items-center">
             <img 
               src="./logo.png" 
-              alt="Hội Liên hiệp Phụ nữ Việt Nam" 
+              alt="Hội Liên hiệp Phụ nữ Lương Sơn" 
               className="h-16 md:h-24 w-auto" 
             />
           </Link>
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
             {NAV_ITEMS.map((item) => (
-              <Link 
-                key={item.href} 
-                to={item.href} 
-                onClick={(e) => handleNavClick(e, item.href)}
-                className="text-white hover:text-yellow-300 font-medium transition-colors duration-200"
-              >
-                {item.label}
-              </Link>
+              (item.href === '#leaderboard' && (!user || user.role !== 'admin')) ? null : (
+                <Link 
+                  key={item.href} 
+                  to={item.href} 
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className="text-white hover:text-yellow-300 font-medium transition-colors duration-200"
+                >
+                  {item.label}
+                </Link>
+              )
             ))}
             
+            <button
+              onClick={() => setShowRewards(true)}
+              className="text-white hover:text-yellow-300 font-medium transition-colors duration-200"
+            >
+              Giải thưởng
+            </button>
+
             {user ? (
               <div className="flex items-center gap-4">
                 <button
@@ -97,9 +109,15 @@ export function Header() {
                 {AUTH_NAV_ITEMS.unauthenticated.label}
               </button>
             )}
+
+            {user && user.role === 'admin' && <SeedButton />}
           </div>
         </nav>
       </div>
+
+      {showRewards && (
+        <RewardStructurePortal onClose={() => setShowRewards(false)} />
+      )}
     </header>
   )
 }

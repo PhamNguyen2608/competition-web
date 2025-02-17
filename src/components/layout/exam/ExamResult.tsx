@@ -25,7 +25,7 @@ export const ExamResult = () => {
         const results = await ExamResultService.getUserResults();
         if (isMounted) {
           setAllResults([...results].sort((a, b) => 
-            new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+            b.completedAt.toDate().getTime() - a.completedAt.toDate().getTime()
           ));
         }
       } catch (error) {
@@ -84,10 +84,17 @@ export const ExamResult = () => {
         <h3 className="text-xl font-semibold mb-4">Lịch sử các lần thi</h3>
         <div className="space-y-4">
           {allResults.map((result) => (
-            <div key={result.completedAt} className="p-4 border rounded">
+            <div key={result.completedAt.toDate().getTime()} className="p-4 border rounded">
               <div>Lần thi {result.attemptCount}</div>
               <div>Điểm số: {result.score}/100</div>
-              <div>Thời gian: {new Date(result.completedAt).toLocaleString()}</div>
+              <div>Thời gian: {new Date(result.completedAt.toMillis()).toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hourCycle: 'h23'
+              })}</div>
             </div>
           ))}
         </div>

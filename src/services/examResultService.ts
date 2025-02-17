@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, setDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebase.config';
 import { ExamResult } from '../types/exam';
 
@@ -15,7 +15,7 @@ export class ExamResultService {
     const examResult: ExamResult = {
       ...result,
       userId: user.uid,
-      completedAt: new Date().toISOString(),
+      completedAt: Timestamp.fromDate(new Date()),
       attemptCount: currentAttempt + 1,
     };
 

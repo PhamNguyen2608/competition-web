@@ -12,6 +12,9 @@ export interface RegisterPayload {
   phoneNumber: string;
   password: string;
   name: string;
+  birthYear: number;
+  gender: 'male' | 'female' | 'other';
+  tieuKhu: string;
 }
 
 export interface LoginPayload {

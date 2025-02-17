@@ -1,5 +1,7 @@
 // ./types.ts
 
+import { Timestamp } from 'firebase/firestore';
+
 export interface Player {
   name: string
   avatar?: string
@@ -13,7 +15,11 @@ export interface Reward {
 
 export interface LeaderboardEntry {
   position: number
-  player: Player
+  player: {
+    name: string
+    avatar: string
+    timestamp: string
+  }
   reward: Reward
   points: number
 }

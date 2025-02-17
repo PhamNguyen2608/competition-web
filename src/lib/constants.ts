@@ -1,5 +1,5 @@
 export const SITE_CONFIG = {
-    title: "CUỘC THI TRỰC TUYẾN TÌM HIỂU LỊCH SỬ ĐẢNG CỘNG SẢN VIỆT NAM",
+    title: "CUỘC THI TRỰC TUYẾN TÌM HIỂU LỊCH SỬ ĐẢNG BỘ THỊ TRẤN LƯƠNG SƠN",
     status: "CUỘC THI ĐÃ KẾT THÚC",
     loginMessage: "Bạn cần đăng nhập để dự thi",
   }
@@ -41,10 +41,48 @@ export const SITE_CONFIG = {
   ]
   
   export const EXAM_RULES = [
-    "Thí sinh có 45 phút để hoàn thành bài thi",
-    "Không được phép tham khảo tài liệu",
+    "Thí sinh có 30 phút để hoàn thành bài thi",
     "Mỗi câu hỏi chỉ được chọn một đáp án", 
     "Hệ thống sẽ tự động nộp bài khi hết thời gian"
   ] as const;
+  
+  export const LOCATION_CONSTANTS = {
+    PROVINCE: {
+      code: "17",
+      name: "Tỉnh Hòa Bình"
+    },
+    DISTRICT: {
+      code: "148",
+      name: "Huyện Lương Sơn"
+    },
+    WARD: {
+      code: "4789",
+      name: "Thị trấn Lương Sơn"
+    }
+  }
+  
+  export const TIEU_KHU = [
+    { code: "TK1", name: "Tiểu khu 1" },
+    { code: "TK2", name: "Tiểu khu 2" },
+    { code: "TK3", name: "Tiểu khu 3" },
+    { code: "TK4", name: "Tiểu khu 4" },
+    { code: "TK5", name: "Tiểu khu 5" },
+    { code: "TK6", name: "Tiểu khu 6" },
+    { code: "TK7", name: "Tiểu khu 7" },
+    { code: "TK8", name: "Tiểu khu 8" },
+    { code: "TK9", name: "Tiểu khu 9" },
+    { code: "TK10", name: "Tiểu khu 10" },
+    { code: "TK11", name: "Tiểu khu 11" },
+    { code: "TK12", name: "Tiểu khu 12" },
+    { code: "TK13", name: "Tiểu khu 13" },
+    { code: "TK14", name: "Tiểu khu 14" },
+    { code: "LIEN_SON", name: "Liên Sơn" },
+    { code: "MONG", name: "Mòng" },
+    { code: "MO", name: "Mỏ" },
+    { code: "DONG_BAI", name: "Đồng Bái" },
+    { code: "TH_THCS_BAI_LANG", name: "Trường TH & THCS Bãi Lạng" },
+    { code: "TH_THCS_CUU_LONG", name: "Trường TH & THCS Cửu Long" },
+    { code: "TH_THCS_HUNG_SON", name: "Trường TH & THCS Hùng Sơn" }
+  ];
   
   

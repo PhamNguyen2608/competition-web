@@ -8,9 +8,10 @@ import {
   deleteUser,
   getAuth,
 } from "firebase/auth";
-import { doc, setDoc, getDoc,collection, query, where, getDocs, writeBatch } from "firebase/firestore";
+import { doc, setDoc, getDoc,collection, query, where, getDocs, writeBatch, Timestamp } from "firebase/firestore";
 import { auth, db } from '../config/firebase.config';
 import { AppUser, RegisterPayload } from '@/types/auth';
+import { LOCATION_CONSTANTS } from '../lib/constants';
 
 interface LoginResult {
   success: boolean;
@@ -66,15 +67,23 @@ class AuthService {
     } catch (error: any) {
       console.error("Login error:", error);
       
-      // Xác định thông báo lỗi phù hợp dựa trên mã lỗi Firebase
       let errorMessage = "Lỗi đăng nhập không xác định";
-      if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
-        errorMessage = "Số điện thoại hoặc mật khẩu không đúng";
+      
+      // Phân biệt các loại lỗi
+      switch (error.code) {
+        case "auth/user-not-found":
+          errorMessage = "Tài khoản chưa được đăng ký";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Sai thông tin đăng nhập";
+          break;
+        case "auth/invalid-email":
+        case "auth/invalid-credential":
+          errorMessage = "Sai thông tin đăng nhập";
+          break;
       }
       
-      // Xóa trạng thái auth (nếu có) để đảm bảo không giữ lại thông tin không hợp lệ
       await this.logout();
-      
       return { success: false, message: errorMessage };
     }
   }
@@ -109,13 +118,19 @@ class AuthService {
         data.password
       );
 
-      // Create user document in Firestore
+      // Create user document in Firestore with fixed location
       await setDoc(doc(db, "users", userCredential.user.uid), {
         uid: userCredential.user.uid,
         phoneNumber: data.phoneNumber,
         displayName: data.name,
+        birthYear: data.birthYear,
+        gender: data.gender,
+        province: LOCATION_CONSTANTS.PROVINCE.name,
+        district: LOCATION_CONSTANTS.DISTRICT.name,
+        ward: LOCATION_CONSTANTS.WARD.name,
+        tieuKhu: data.tieuKhu,
         role: 'user',
-        createdAt: new Date().toISOString()
+        createdAt: Timestamp.now()
       });
 
       // Update profile
@@ -123,7 +138,6 @@ class AuthService {
         displayName: data.name
       });
 
-      // Immediately sign out and clear any auth state
       await this.logout();
       localStorage.removeItem('auth_token');
     } catch (error: any) {
