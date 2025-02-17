@@ -5,9 +5,12 @@ import { CustomButton } from '../../ui/button';
 import { ExamResultService } from '../../../services/examResultService';
 import { ExamResult as ExamResultType } from '../../../types/exam';
 import { resetQuiz } from '../../../features/exam-question/quizSlice';
+import { ParticipantService } from '../../../services/participantService';
+import { TIEU_KHU } from '../../../lib/constants';
 
 export const ExamResult = () => {
   const { examResult, questions } = useAppSelector((state) => state.quiz);
+  const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [allResults, setAllResults] = useState<ExamResultType[]>([]);
@@ -36,6 +39,25 @@ export const ExamResult = () => {
     fetchAllResults();
     return () => { isMounted = false };
   }, [examResult]);
+
+  useEffect(() => {
+    const addParticipant = async () => {
+      if (examResult && user) {
+        try {
+          await ParticipantService.addParticipant({
+            userId: user.uid,
+            name: user.displayName || 'Anonymous',
+            score: examResult.score,
+            attemptCount: examResult.attemptCount,
+            subDistrict: user.tieuKhu
+          });
+        } catch (error) {
+          console.error('Error adding participant:', error);
+        }
+      }
+    };
+    addParticipant();
+  }, [examResult, user]);
 
   // Cache kết quả bài thi
   const examResultContent = useMemo(() => {

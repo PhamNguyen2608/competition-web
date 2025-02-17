@@ -6,6 +6,8 @@ export interface AppUser {
   emailVerified: boolean;
   role: 'user' | 'admin';
   providerId: string;
+  district: string;
+  tieuKhu: string;
 }
 
 export interface RegisterPayload {

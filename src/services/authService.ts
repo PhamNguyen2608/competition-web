@@ -35,7 +35,9 @@ class AuthService {
       displayName: firebaseUser.displayName || '',
       emailVerified: firebaseUser.emailVerified,
       role: userDoc.data()?.role || 'user',
-      providerId: firebaseUser.providerId
+      providerId: firebaseUser.providerId,
+      district: userDoc.data()?.district || 'Không xác định',
+      tieuKhu: userDoc.data()?.tieuKhu || 'Không xác định'
     };
   }
 

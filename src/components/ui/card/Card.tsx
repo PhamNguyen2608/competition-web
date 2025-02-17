@@ -1,5 +1,6 @@
 import { cn } from "../../../lib/utils"
 import { forwardRef } from "react"
+import { CachedImage } from "../../ui/image/CachedImage"
 
 type CardProps = {
   className?: string
@@ -28,7 +29,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       >
         {image && (
           <div className={cn("relative mx-auto", image.className)}>
-            <img
+            <CachedImage
               src={image.src}
               alt={image.alt}
               className="object-cover w-full h-full"

@@ -7,7 +7,7 @@ export const SITE_CONFIG = {
   export const NAV_ITEMS = [
     { label: "Trang chủ", href: "/" },
     { label: "Hướng dẫn", href: "#guidelines" },
-    { label: "Bảng xếp hạng", href: "#leaderboard" },
+    { label: "Bảng xếp hạng", href: "/leaderboard" },
   ]
   
   export const AUTH_NAV_ITEMS = {

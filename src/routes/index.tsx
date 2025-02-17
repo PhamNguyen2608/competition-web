@@ -2,16 +2,17 @@
 import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import { publicRoutes } from './public.routes';
 import homeRoutes from './home.routes';
+import adminRoutes from './admin.routes';
 
 const routeRegistry: Record<string, RouteObject[]> = {
   public: [...publicRoutes],
-  protected: [...homeRoutes], 
-  auth: [],
+  protected: [...homeRoutes],
+  admin: [...adminRoutes],
 };
 
 export const createRouter = (config: { authEnabled: boolean }) => {
   return createBrowserRouter([
-    ...(config.authEnabled ? routeRegistry.auth : []),
+    ...(config.authEnabled ? routeRegistry.admin : []),
     ...routeRegistry.protected,
     ...routeRegistry.public,
     {

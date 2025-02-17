@@ -7,9 +7,6 @@ export default function MainLayout() {
   return (
     <div className="container-custom space-y-8">
       <CompetitionBanner />
-      <div id="leaderboard">
-        <LeaderboardCard />
-      </div>
       <div id="guidelines">
         <GuidelinesCard />
       </div>

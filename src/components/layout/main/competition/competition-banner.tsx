@@ -3,6 +3,7 @@ import { SITE_CONFIG } from "../../../../lib/constants"
 import { CompetitionTimer } from "./competition-timmer"
 import { CompetitionActions } from "./competition-action"
 import { useAppSelector } from "../../../../store/hooks"
+import { CachedImage } from "../../../ui/image/CachedImage"
 
 export function CompetitionBanner() {
   const { user } = useAppSelector(state => state.auth)
@@ -18,7 +19,7 @@ export function CompetitionBanner() {
       </div>
 
       <div className="relative w-full md:w-[500px] h-[200px] md:h-[300px] mx-auto mb-4">
-        <img
+        <CachedImage
           src="/daihoidang.jpg"
           srcSet="/daihoidang-mobile.jpg 500w, /daihoidang.jpg 800w"
           sizes="(max-width: 768px) 100vw, 500px"
@@ -28,6 +29,7 @@ export function CompetitionBanner() {
           className="object-contain w-full h-full rounded-lg shadow-lg"
           loading="lazy"
           decoding="async"
+          fallback="/banner-placeholder.jpg"
         />
       </div>
       

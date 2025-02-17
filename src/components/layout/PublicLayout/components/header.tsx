@@ -6,6 +6,7 @@ import { logout } from "../../../../features/auth/authSlice"
 import { useState } from "react"
 import { RewardStructurePortal } from "../../main/RewardStructurePortal"
 import SeedButton from "../../../../components/SeedButton"
+import { CachedImage } from "../../../ui/image/CachedImage"
 
 export function Header() {
   const navigate = useNavigate()
@@ -56,7 +57,7 @@ export function Header() {
       <div className="container-custom">
         <nav className="flex flex-col md:flex-row justify-between items-center py-2 gap-4">
           <Link to="/" className="flex items-center">
-            <img 
+            <CachedImage 
               src="./logo.png" 
               alt="Hội Liên hiệp Phụ nữ Lương Sơn" 
               className="h-16 md:h-24 w-auto" 
