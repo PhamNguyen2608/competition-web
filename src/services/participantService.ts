@@ -27,12 +27,28 @@ interface UserData {
   createdAt: Timestamp;
 }
 
+// Thêm export cho interface
+export interface LeaderboardParticipant {
+  userId: string;
+  name: string;
+  score: number;
+  completedAt: Timestamp;
+  attemptCount: number;
+}
+
 export const ParticipantService = {
   async addParticipant(data: Omit<Participant, 'completedAt' | 'isFirstAttempt'>) {
     try {
-      // Kiểm tra xem người dùng đã có kết quả thi trước đó chưa
+      // Kiểm tra số lần thi từ exam_results
       const examResults = await ExamResultService.getUserResults();
-      const isFirstAttempt = examResults.length === 1; // Chỉ là lần đầu nếu đây là kết quả đầu tiên
+      
+      // Nếu đã thi quá 3 lần, không cho thêm participant mới
+      if (examResults.length > 3) {
+        console.warn('Đã vượt quá giới hạn số lần thi, không thêm participant mới');
+        return false;
+      }
+
+      const isFirstAttempt = examResults.length === 1;
 
       const participantData = {
         ...data,
@@ -41,80 +57,135 @@ export const ParticipantService = {
       }
 
       await addDoc(collection(db, 'participants'), participantData)
-      return true
+      return true;
     } catch (error) {
       console.error('Error adding participant:', error)
-      return false
+      return false;
     }
   },
 
   async getTotalParticipants() {
     try {
-      const uniqueUsers = new Set()
       const q = query(
-        collection(db, 'exam_results')
-      )
-      const snapshot = await getDocs(q)
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data()
-        if (data.attemptCount === 1) { // Chỉ đếm lần thi đầu tiên
-          uniqueUsers.add(data.userId)
-        }
-      })
-
-      return uniqueUsers.size
+        collection(db, 'exam_results'),
+        where('attemptCount', '==', 1) // Chỉ đếm người thi lần đầu
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.size;
     } catch (error) {
-      console.error('Error getting total participants:', error)
-      return 0
+      console.error('Error getting total participants:', error);
+      return 0;
     }
   },
 
   async getParticipantsBySubDistrict() {
     try {
-      // Khởi tạo map với tất cả tiểu khu từ constants
-      const subDistrictStats = new Map(
-        TIEU_KHU.map(tk => [tk.code, 0])
-      );
+      // Khởi tạo object thống kê cho mỗi tiểu khu
+      const subDistrictStats = TIEU_KHU.reduce((acc, tk) => {
+        acc[tk.code] = 0;
+        return acc;
+      }, {} as Record<string, number>);
 
-      // Lấy tất cả kết quả thi
-      const q = query(collection(db, 'exam_results'));
+      // Lấy tất cả kết quả thi lần đầu
+      const q = query(
+        collection(db, 'exam_results'),
+        where('attemptCount', '==', 1) // Chỉ đếm lần thi đầu tiên
+      );
       const snapshot = await getDocs(q);
-      
-      // Map để theo dõi người dùng đã được đếm
-      const countedUsers = new Set<string>();
-      
-      // Sử dụng Promise.all để đợi tất cả các promises hoàn thành
+
+      // Đếm số người tham gia cho mỗi tiểu khu
       await Promise.all(
-        snapshot.docs.map(async (examDoc) => {
-          const data = examDoc.data();
-          // Chỉ đếm lần thi đầu tiên của mỗi người
-          if (data.attemptCount === 1 && !countedUsers.has(data.userId)) {
-            countedUsers.add(data.userId);
-            
-            // Lấy thông tin người dùng từ collection users
-            const userDoc = await getDoc(doc(db, "users", data.userId));
-            if (userDoc.exists()) {
-              const userData = userDoc.data() as UserData;
-              if (userData.tieuKhu) {
-                subDistrictStats.set(
-                  userData.tieuKhu,
-                  (subDistrictStats.get(userData.tieuKhu) || 0) + 1
-                );
-              }
+        snapshot.docs.map(async (docSnapshot) => {
+          const data = docSnapshot.data();
+          const userDocRef = doc(db, "users", data.userId);
+          const userDocSnapshot = await getDoc(userDocRef);
+          
+          if (userDocSnapshot.exists()) {
+            const userData = userDocSnapshot.data() as UserData;
+            if (userData.tieuKhu) {
+              subDistrictStats[userData.tieuKhu] = 
+                (subDistrictStats[userData.tieuKhu] || 0) + 1;
             }
           }
         })
       );
 
-      // Chuyển map thành array và sort
-      const sortedStats = Array.from(subDistrictStats.entries())
-        .sort((a, b) => b[1] - a[1]);
+      // Chuyển đổi thành mảng và sắp xếp theo số người tham gia giảm dần
+      const sortedStats = Object.entries(subDistrictStats)
+        .sort(([, a], [, b]) => b - a)
+        .reduce((acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, number>);
 
-      return Object.fromEntries(sortedStats);
+      return sortedStats;
     } catch (error) {
       console.error('Error getting participants by sub-district:', error);
       return {};
     }
+  },
+
+  async getLeaderboard() {
+    try {
+      const uniqueUsers = new Map<string, LeaderboardParticipant>();
+      
+      // Lấy tất cả kết quả thi
+      const q = query(
+        collection(db, 'exam_results'),
+        where('attemptCount', '<=', 3) // Chỉ lấy 3 lần thi đầu tiên
+      );
+      
+      const snapshot = await getDocs(q);
+      console.log('Total exam results:', snapshot.size);
+
+      if (snapshot.empty) {
+        console.log('No exam results found in collection');
+        return [];
+      }
+
+      // Duyệt qua các kết quả
+      for (const docSnapshot of snapshot.docs) {
+        const data = docSnapshot.data();
+        const userId = data.userId;
+        
+        // Lấy thông tin user
+        const userDocRef = doc(db, "users", userId);
+        const userDocSnapshot = await getDoc(userDocRef);
+        
+        if (userDocSnapshot.exists()) {
+          const userData = userDocSnapshot.data() as UserData;
+          
+          // Kiểm tra và cập nhật điểm cao nhất
+          const existingResult = uniqueUsers.get(userId);
+          if (!existingResult || 
+              data.score > existingResult.score || 
+              (data.score === existingResult.score && 
+               data.completedAt.toMillis() < existingResult.completedAt.toMillis())) {
+            uniqueUsers.set(userId, {
+              userId,
+              name: userData.displayName || 'Anonymous',
+              score: data.score,
+              completedAt: data.completedAt,
+              attemptCount: data.attemptCount
+            });
+          }
+        }
+      }
+
+      // Chuyển đổi Map thành mảng và sắp xếp
+      const leaderboard = Array.from(uniqueUsers.values())
+        .sort((a, b) => {
+          // Sắp xếp theo điểm từ cao xuống thấp
+          if (b.score !== a.score) return b.score - a.score;
+          // Nếu điểm bằng nhau, sắp xếp theo thời gian hoàn thành sớm hơn
+          return a.completedAt.toMillis() - b.completedAt.toMillis();
+        });
+
+      return leaderboard;
+    } catch (error) {
+      console.error('Error getting leaderboard:', error);
+      return [];
+    }
   }
 }
+

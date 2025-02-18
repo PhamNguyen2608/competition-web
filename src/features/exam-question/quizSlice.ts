@@ -1,10 +1,17 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Question, QuizState } from "../../types/question"
 
+interface SetExamResultPayload {
+  score: number;
+  correctAnswers: number;
+  attemptCount: number;
+  duration: number;
+}
+
 const initialState: QuizState = {
   currentQuestionId: 1,
   answers: {},
-  timeRemaining: 45 * 60, // 45 minutes in seconds (based on EXAM_RULES)
+  timeRemaining: 5, // 5 seconds for testing
   isSubmitted: false,
   questions: [],
   loading: true,
@@ -50,17 +57,12 @@ const quizSlice = createSlice({
       state.correctAnswers = correctCount;
       state.score = (correctCount / state.questions.length) * 100;
     },
-    setExamResult: (state, action: PayloadAction<{ score: number; correctAnswers: number; attemptCount: number }>) => {
-      state.score = action.payload.score;
-      state.correctAnswers = action.payload.correctAnswers;
-      state.attemptCount = action.payload.attemptCount;
+    setExamResult: (state, action: PayloadAction<SetExamResultPayload>) => {
+      state.examResult = {
+        ...action.payload
+      };
       state.isSubmitted = true;
       state.hasCompletedExam = true;
-      state.examResult = {
-        score: action.payload.score,
-        correctAnswers: action.payload.correctAnswers,
-        attemptCount: action.payload.attemptCount,
-      };
     },
     submitQuiz: (state) => {
       state.isSubmitted = true;
@@ -82,6 +84,7 @@ const quizSlice = createSlice({
         score,
         correctAnswers: correctCount,
         attemptCount: state.attemptCount + 1,
+        duration: 45 * 60 - state.timeRemaining
       };
       state.attemptCount = state.attemptCount + 1;
     },

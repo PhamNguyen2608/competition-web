@@ -1,4 +1,4 @@
-import { useState,memo } from "react"
+import { useState,memo, useEffect } from "react"
 import { CustomButton } from "../../../components/ui/button"
 import { setCurrentQuestion, setExamResult, submitQuiz } from "../../../features/exam-question/quizSlice"
 import { useAppDispatch, useAppSelector } from "../../../store/hooks"
@@ -14,9 +14,12 @@ interface QuizControlsProps {
 export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizControlsProps) {
   const { t } = useTranslation()
   const [showWarning, setShowWarning] = useState(false)
+  const [startTime] = useState(() => Date.now())
   const currentQuestionId = useAppSelector((state) => state.quiz.currentQuestionId)
   const answers = useAppSelector((state) => state.quiz.answers)
   const dispatch = useAppDispatch()
+  const { isSubmitted } = useAppSelector((state) => state.quiz)
+  const { user } = useAppSelector((state) => state.auth)
 
   const answeredCount = Object.keys(answers).length
 
@@ -29,6 +32,8 @@ export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizC
   }
 
   const handleSubmit = async () => {
+    if (!user) return;
+
     try {
       dispatch(submitQuiz())
       const state = store.getState().quiz
@@ -41,12 +46,17 @@ export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizC
         ? Math.round((correctCount / state.questions.length) * 100)
         : 0;
       
+      const duration = Math.floor((Date.now() - startTime) / 1000);
+      
       await ExamResultService.saveResult({
         score: score,
         correctAnswers: correctCount,
         totalQuestions: state.questions.length,
-        answers: state.answers
-      })
+        answers: state.answers,
+        tieuKhu: user.tieuKhu,
+        userId: user.uid,
+        duration: duration
+      }, duration);
 
       // Force refresh results
       const updatedResults = await ExamResultService.getUserResults();
@@ -59,6 +69,17 @@ export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizC
       console.error('Failed to save exam result:', error)
     }
   }
+
+  useEffect(() => {
+    const timeLimit = 45 * 60 * 1000; // 45 phút
+    const timeoutId = setTimeout(() => {
+      if (!isSubmitted) {
+        handleSubmit();
+      }
+    }, timeLimit);
+
+    return () => clearTimeout(timeoutId);
+  }, [isSubmitted]);
 
   return (
     <>

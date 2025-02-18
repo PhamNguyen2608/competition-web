@@ -1,25 +1,33 @@
-import { collection, doc, getDoc, setDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, query, where, getDocs, Timestamp, addDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase.config';
 import { ExamResult } from '../types/exam';
 
 export class ExamResultService {
   private static readonly COLLECTION_NAME = 'exam_results';
 
-  static async saveResult(result: Omit<ExamResult, 'userId' | 'completedAt' | 'attemptCount'>): Promise<void> {
-    const user = auth.currentUser;
-    if (!user) throw new Error('User not authenticated');
+  static async saveResult(data: Omit<ExamResult, 'completedAt' | 'attemptCount'>, duration: number) {
+    try {
+      // Kiểm tra số lần thi
+      const results = await this.getUserResults();
+      if (results.length >= 3) {
+        throw new Error('Đã vượt quá giới hạn số lần thi (tối đa 3 lần)');
+      }
 
-    const currentAttempt = await this.getAttemptCount(user.uid);
-    const resultId = `${user.uid}_${currentAttempt + 1}`;
-    
-    const examResult: ExamResult = {
-      ...result,
-      userId: user.uid,
-      completedAt: Timestamp.fromDate(new Date()),
-      attemptCount: currentAttempt + 1,
-    };
+      const attemptCount = results.length + 1;
+      
+      const examResult = {
+        ...data,
+        completedAt: Timestamp.now(),
+        attemptCount,
+        duration
+      };
 
-    await setDoc(doc(db, this.COLLECTION_NAME, resultId), examResult);
+      await addDoc(collection(db, 'exam_results'), examResult);
+      return examResult;
+    } catch (error) {
+      console.error('Error saving exam result:', error);
+      throw error;
+    }
   }
 
   static async getUserResults(): Promise<ExamResult[]> {

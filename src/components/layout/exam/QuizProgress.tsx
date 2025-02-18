@@ -2,6 +2,7 @@ import { Progress } from "../../../components/ui/progress/Progress";
 import { useAppSelector } from "../../../store/hooks";
 import { memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { QuizTimer } from "./QuizTimer";
 
 interface QuizProgressProps {
   totalQuestions: number;
@@ -18,7 +19,8 @@ export const QuizProgress = memo(function QuizProgress({ totalQuestions }: QuizP
   }, [answeredCount, totalQuestions]);
 
   return (
-    <div className="space-y-2 mb-6">
+    <div className="space-y-4 mb-6">
+      <QuizTimer />
       <div className="flex justify-between text-sm text-muted-foreground">
         <span>{t('quiz.progress.title')}</span>
         <span>

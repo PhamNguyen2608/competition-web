@@ -8,4 +8,6 @@ export interface ExamResult {
   answers: Record<number, string>;
   completedAt: Timestamp;
   attemptCount: number;
+  duration: number;
+  tieuKhu: string;
 } 

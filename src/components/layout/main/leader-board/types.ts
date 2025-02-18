@@ -8,11 +8,6 @@ export interface Player {
   timestamp: string
 }
 
-export interface Reward {
-  value: number
-  trend: "up" | "down"
-}
-
 export interface LeaderboardEntry {
   position: number
   player: {
@@ -20,7 +15,6 @@ export interface LeaderboardEntry {
     avatar: string
     timestamp: string
   }
-  reward: Reward
   points: number
 }
 

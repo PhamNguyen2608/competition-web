@@ -22,7 +22,7 @@ const LeaderboardRow = memo(({ entry, index }: LeaderboardRowProps) => {
         </div>
       </div>
 
-      <div className="w-[43%] md:w-[40%]">
+      <div className="w-[43%] md:w-[60%]">
         <div className="flex items-center gap-2 md:gap-3">
           <img
             src={entry.player.avatar}
@@ -40,20 +40,7 @@ const LeaderboardRow = memo(({ entry, index }: LeaderboardRowProps) => {
         </div>
       </div>
 
-      <div className="w-[25%] text-right hidden md:block">
-        <div className="flex items-center justify-end gap-1 md:gap-2">
-          {entry.reward.trend === "up" ? (
-            <ChevronUp className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-green-500" />
-          ) : (
-            <ChevronDown className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-red-500" />
-          )}
-          <span className="text-sm md:text-base lg:text-lg font-medium text-gray-900">
-            +{entry.reward.value.toLocaleString()}
-          </span>
-        </div>
-      </div>
-
-      <div className="w-[45%] md:w-[20%] text-right">
+      <div className="w-[45%] md:w-[25%] text-right">
         <span className="text-sm md:text-base lg:text-lg font-bold text-[#38BDF8]">
           {entry.points.toLocaleString()} pt
         </span>
@@ -76,9 +63,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries = [] }) => {
       <div className="flex items-center px-6 py-4 bg-gray-50">
         <div className="w-[15%] font-semibold text-gray-700 hidden md:block">POSITION</div>
         <div className="w-[12%] font-semibold text-gray-700 md:hidden">#</div>
-        <div className="w-[43%] md:w-[40%] font-semibold text-gray-700">PLAYER</div>
-        <div className="w-[25%] text-right font-semibold text-gray-700 hidden md:block">REWARD</div>
-        <div className="w-[45%] md:w-[20%] text-right font-semibold text-gray-700">POINTS</div>
+        <div className="w-[43%] md:w-[60%] font-semibold text-gray-700">PLAYER</div>
+        <div className="w-[45%] md:w-[25%] text-right font-semibold text-gray-700">POINTS</div>
       </div>
       <div>
         {rows}

@@ -49,7 +49,8 @@ function QuizPage() {
           dispatch(setExamResult({
             score: latestResult.score,
             correctAnswers: latestResult.correctAnswers,
-            attemptCount: latestResult.attemptCount
+            attemptCount: latestResult.attemptCount,
+            duration: latestResult.duration
           }))
         }
       } catch (error) {

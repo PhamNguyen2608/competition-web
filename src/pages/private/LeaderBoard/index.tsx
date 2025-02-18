@@ -7,12 +7,14 @@ import { LeaderboardEntry } from "../../../components/layout/main/leader-board/t
 import { ParticipantService } from "../../../services/participantService"
 import "./leaderBoard.css"
 import { TIEU_KHU } from "../../../lib/constants"
+import { LeaderboardParticipant } from "../../../services/participantService"
 
 export default function LeaderboardPage() {
   const navigate = useNavigate()
   const { user } = useAppSelector((state) => state.auth)
   const [totalParticipants, setTotalParticipants] = useState(0)
   const [subDistrictStats, setSubDistrictStats] = useState<Record<string, number>>({})
+  const [leaderboard, setLeaderboard] = useState<LeaderboardParticipant[]>([])
 
   useEffect(() => {
     let isMounted = true
@@ -33,8 +35,16 @@ export default function LeaderboardPage() {
       setSubDistrictStats(stats)
     }
 
+    const fetchLeaderboard = async () => {
+      const data = await ParticipantService.getLeaderboard()
+      if (isMounted) {
+        setLeaderboard(data)
+      }
+    }
+
     fetchTotalParticipants()
     fetchStats()
+    fetchLeaderboard()
     
     // Cleanup function
     return () => {
@@ -42,73 +52,21 @@ export default function LeaderboardPage() {
     }
   }, []) // Có thể thêm dependencies nếu cần refresh data
 
-  const leaderboardData: LeaderboardEntry[] = [
-    {
-      position: 1,
-      player: {
-        name: "Nguyễn Văn A",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=1",
-        timestamp: "2024-03-15T10:30:00Z"
-      },
-      reward: {
-        value: 5000000,
-        trend: "up"
-      },
-      points: 20284
+  const leaderboardData: LeaderboardEntry[] = leaderboard.map((item, index) => ({
+    position: index + 1,
+    player: {
+      name: item.name,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userId}`,
+      timestamp: item.completedAt.toDate().toISOString()
     },
-    {
-      position: 2,
-      player: {
-        name: "Trần Thị B",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=2",
-        timestamp: "2024-03-15T09:45:00Z"
-      },
-      reward: {
-        value: 3000000,
-        trend: "up"
-      },
-      points: 19950
-    },
-    {
-      position: 3,
-      player: {
-        name: "Lê Văn C",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=3",
-        timestamp: "2024-03-15T11:20:00Z"
-      },
-      reward: {
-        value: 2000000,
-        trend: "down"
-      },
-      points: 19800
-    },
-    {
-      position: 4,
-      player: {
-        name: "Phạm Thị D",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=4",
-        timestamp: "2024-03-15T08:15:00Z"
-      },
-      reward: {
-        value: 1000000,
-        trend: "down"
-      },
-      points: 19600
-    },
-    {
-      position: 5,
-      player: {
-        name: "Hoàng Văn E",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=5",
-        timestamp: "2024-03-15T12:00:00Z"
-      },
-      reward: {
-        value: 500000,
-        trend: "down"
-      },
-      points: 19400
+    points: item.score,
+    reward: {
+      value: item.score >= 80 ? 5000000 : 
+             item.score >= 60 ? 3000000 : 
+             item.score >= 40 ? 1000000 : 0,
+      trend: "up"
     }
-  ]
+  }));
 
   // Nếu không phải admin, redirect về trang chủ
   if (!user || user.role !== 'admin') {
@@ -146,7 +104,9 @@ export default function LeaderboardPage() {
             </div>
             <div className="text-center text-white p-3 md:p-4">
               <p className="text-base md:text-lg opacity-90">Điểm cao nhất</p>
-              <p className="text-2xl md:text-3xl font-bold">20,284</p>
+              <p className="text-2xl md:text-3xl font-bold">
+                {leaderboard.length > 0 ? leaderboard[0].score : 0}
+              </p>
             </div>
             <div className="text-center text-white p-3 md:p-4">
               <p className="text-base md:text-lg opacity-90">Tổng giải thưởng</p>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { useNavigate } from 'react-router-dom';
 import { CustomButton } from '../../ui/button';
@@ -14,6 +14,8 @@ export const ExamResult = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [allResults, setAllResults] = useState<ExamResultType[]>([]);
+  const [hasReachedAttemptLimit, setHasReachedAttemptLimit] = useState(false);
+  const hasAddedParticipant = useRef(false);
 
   const getScoreColor = useCallback((score: number) => {
     if (score >= 80) return 'text-green-600';
@@ -22,38 +24,31 @@ export const ExamResult = () => {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchAllResults = async () => {
+    const checkAttemptLimit = async () => {
       try {
         const results = await ExamResultService.getUserResults();
-        if (isMounted) {
-          setAllResults([...results].sort((a, b) => 
-            b.completedAt.toDate().getTime() - a.completedAt.toDate().getTime()
-          ));
-        }
+        setAllResults([...results].sort((a, b) => 
+          b.completedAt.toMillis() - a.completedAt.toMillis()
+        ));
+        setHasReachedAttemptLimit(results.length >= 3);
       } catch (error) {
-        console.error('Error fetching results:', error);
+        console.error('Error checking attempt limit:', error);
       }
     };
-    
-    fetchAllResults();
-    return () => { isMounted = false };
+    checkAttemptLimit();
   }, [examResult]);
 
   useEffect(() => {
     const addParticipant = async () => {
-      if (examResult && user) {
-        try {
-          await ParticipantService.addParticipant({
-            userId: user.uid,
-            name: user.displayName || 'Anonymous',
-            score: examResult.score,
-            attemptCount: examResult.attemptCount,
-            subDistrict: user.tieuKhu
-          });
-        } catch (error) {
-          console.error('Error adding participant:', error);
-        }
+      if (examResult && user && !hasAddedParticipant.current) {
+        await ParticipantService.addParticipant({
+          userId: user.uid,
+          name: user.displayName || 'Anonymous', 
+          score: examResult.score,
+          attemptCount: examResult.attemptCount,
+          subDistrict: user.tieuKhu
+        });
+        hasAddedParticipant.current = true;
       }
     };
     addParticipant();
@@ -62,6 +57,13 @@ export const ExamResult = () => {
   // Cache kết quả bài thi
   const examResultContent = useMemo(() => {
     if (!examResult) return null;
+
+    // Format duration to minutes and seconds
+    const formatDuration = (seconds: number) => {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes} phút ${remainingSeconds} giây`;
+    };
 
     return (
       <div className="space-y-4 mb-8">
@@ -83,6 +85,13 @@ export const ExamResult = () => {
           <p className="text-lg">Số lần đã thi</p>
           <p className="text-2xl font-semibold">
             {examResult?.attemptCount || 0} lần
+          </p>
+        </div>
+
+        <div className="text-center">
+          <p className="text-lg">Thời gian làm bài</p>
+          <p className="text-2xl font-semibold">
+            {formatDuration(examResult.duration)}
           </p>
         </div>
 
@@ -134,20 +143,31 @@ export const ExamResult = () => {
       
       {examResultContent}
 
-      <div className="flex justify-center gap-4">
+      <div className="flex gap-4">
+        {hasReachedAttemptLimit ? (
+          <CustomButton
+            disabled={true}
+            color="primary"
+            title="Bạn đã hết lượt thi (tối đa 3 lần)"
+          >
+            Đã hết lượt thi
+          </CustomButton>
+        ) : (
+          <CustomButton
+            onClick={() => {
+              dispatch(resetQuiz());
+              navigate('/exam/questions');
+            }}
+            color="primary"
+          >
+            Thi lại
+          </CustomButton>
+        )}
         <CustomButton
           onClick={() => {
             dispatch(resetQuiz());
-            navigate('/exam/questions');
+            navigate('/');
           }}
-          variant="outline"
-          color="primary"
-        >
-          Thi lại
-        </CustomButton>
-        <CustomButton
-          onClick={() => navigate('/')}
-          variant="solid"
           color="primary"
         >
           Về trang chủ

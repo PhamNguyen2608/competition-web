@@ -28,10 +28,6 @@ export function LeaderboardCard() {
         avatar: "/placeholder.svg?height=32&width=32",
         timestamp: Timestamp.fromDate(new Date("2024-01-23")),
       },
-      reward: {
-        value: 150000,
-        trend: "up" as const,
-      },
       points: 20284,
     },
     {
@@ -40,10 +36,6 @@ export function LeaderboardCard() {
         name: "Carol Simpson",
         avatar: "/placeholder.svg?height=32&width=32",
         timestamp: Timestamp.fromDate(new Date("2024-01-23")),
-      },
-      reward: {
-        value: 150000,
-        trend: "up" as const,
       },
       points: 14233,
     },
@@ -54,10 +46,6 @@ export function LeaderboardCard() {
         avatar: "/placeholder.svg?height=32&width=32",
         timestamp: Timestamp.fromDate(new Date("2024-01-23")),
       },
-      reward: {
-        value: 145000,
-        trend: "up" as const,
-      },
       points: 13300,
     },
     {
@@ -67,10 +55,6 @@ export function LeaderboardCard() {
         avatar: "/placeholder.svg?height=32&width=32",
         timestamp: Timestamp.fromDate(new Date("2024-01-23")),
       },
-      reward: {
-        value: 145000,
-        trend: "down" as const,
-      },
       points: 12532,
     },
     {
@@ -79,10 +63,6 @@ export function LeaderboardCard() {
         name: "Aaron Ortiz",
         avatar: "/placeholder.svg?height=32&width=32",
         timestamp: Timestamp.fromDate(new Date("2024-01-23")),
-      },
-      reward: {
-        value: 75,
-        trend: "up" as const,
       },
       points: 11045,
     },

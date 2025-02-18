@@ -2,17 +2,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { ExamResultService } from '../services/examResultService';
 import { submitQuiz } from '../features/exam-question/quizSlice';
+import { ParticipantService } from '../services/participantService';
 
 export function useGuardedNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSubmitted, questions, answers } = useAppSelector((state) => state.quiz);
+  const { isSubmitted, questions, answers, timeRemaining } = useAppSelector((state) => state.quiz);
+  const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
 
   const guardedNavigate = async (to: string) => {
     const isExamPage = location.pathname === '/exam/questions';
     
-    if (isExamPage && !isSubmitted) {
+    if (isExamPage && !isSubmitted && Object.keys(answers).length > 0) {
       // Tự động submit khi thoát
       dispatch(submitQuiz());
       
@@ -28,8 +30,11 @@ export function useGuardedNavigation() {
         score,
         correctAnswers: correctCount,
         totalQuestions: questions.length,
-        answers
-      });
+        answers,
+        tieuKhu: user?.tieuKhu || '',
+        userId: user?.uid || '',
+        duration: 45 * 60 - timeRemaining
+      }, 45 * 60 - timeRemaining);
     }
     
     navigate(to);

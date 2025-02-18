@@ -23,6 +23,7 @@ export interface Question {
       score: number;
       correctAnswers: number;
       attemptCount: number;
+      duration: number;
     } | null;
     attemptCount: number;
   }
