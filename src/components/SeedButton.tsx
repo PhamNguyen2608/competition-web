@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { seedQuestions } from '../scripts/seedQuestions';
+import { updateQuestionsVersion } from '../scripts/updateQuestionsVersion';
 
 const SeedButton = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,6 +13,7 @@ const SeedButton = () => {
     try {
       const success = await seedQuestions();
       if (success) {
+        await updateQuestionsVersion();
         setMessage('Thêm câu hỏi thành công!');
       } else {
         setMessage('Có lỗi xảy ra khi thêm câu hỏi.');
