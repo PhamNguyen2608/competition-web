@@ -4,6 +4,7 @@ import type { RouteObject } from 'react-router-dom';
 import { protectedLoader } from './loaders';
 import { PublicLayout } from '../components/layout/PublicLayout';
 import  ExamQuestionPage  from '../pages/private/ExamQuestion';
+import { ExamGuard } from '../pages/guard/ExamGuard';
 
 const HomePage = lazy(() => import('../components/layout/main/MainLayout'));
 const Analytics = lazy(() => import('../components/layout/main/MainLayout'));
@@ -32,11 +33,19 @@ const homeRoutes: RouteObject[] = [
       },
       {
         path: '/exam',
-        element: <ExamPage />
+        element: (
+          <ExamGuard>
+            <ExamPage />
+          </ExamGuard>
+        )
       },
       {
         path: '/exam/questions',
-        element: <ExamQuestionPage />
+        element: (
+          <ExamGuard>
+            <ExamQuestionPage />
+          </ExamGuard>
+        )
       },
       {
         path: '/exam/result',

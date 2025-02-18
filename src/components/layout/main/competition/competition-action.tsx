@@ -4,10 +4,12 @@ import { useState } from "react";
 import React, { lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../../../store/hooks";
+import { useCompetitionStatus } from "../../../../hooks/useCompetitionStatus";
 
 const GuidelinesModal = lazy(() => import('./guidelines-modal'));
 
 export function CompetitionActions() {
+  const { isEnded } = useCompetitionStatus();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAppSelector(state => state.auth);
@@ -27,8 +29,9 @@ export function CompetitionActions() {
         <CustomButton 
           color="primary"
           onClick={handleJoinCompetition}
+          disabled={isEnded}
         >
-          {t('competition.join')}
+          {isEnded ? 'Đã kết thúc' : t('competition.join')}
         </CustomButton>
         <CustomButton 
           variant="outline" 

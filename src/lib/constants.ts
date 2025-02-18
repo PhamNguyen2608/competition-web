@@ -1,8 +1,12 @@
 export const SITE_CONFIG = {
-    title: "CUỘC THI TRỰC TUYẾN TÌM HIỂU LỊCH SỬ ĐẢNG BỘ THỊ TRẤN LƯƠNG SƠN",
-    status: "CUỘC THI ĐÃ KẾT THÚC",
-    loginMessage: "Bạn cần đăng nhập để dự thi",
-  }
+  title: "CUỘC THI TRỰC TUYẾN TÌM HIỂU LỊCH SỬ ĐẢNG BỘ THỊ TRẤN LƯƠNG SƠN",
+  getStatus: () => {
+    return new Date().getTime() >= COMPETITION_END_TIME 
+      ? "CUỘC THI ĐÃ KẾT THÚC"
+      : "CUỘC THI ĐANG DIỄN RA";
+  },
+  loginMessage: "Bạn cần đăng nhập để dự thi",
+}
   
   export const NAV_ITEMS = [
     { label: "Trang chủ", href: "/" },
@@ -97,5 +101,7 @@ export const SITE_CONFIG = {
     { code: "TH_THCS_CUU_LONG", name: "Trường TH & THCS Cửu Long" },
     { code: "TH_THCS_HUNG_SON", name: "Trường TH & THCS Hùng Sơn" }
   ];
+  
+  export const COMPETITION_END_TIME = new Date('2025-03-06T23:59:59').getTime();
   
   
