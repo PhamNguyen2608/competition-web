@@ -7,7 +7,8 @@ export const SITE_CONFIG = {
   export const NAV_ITEMS = [
     { label: "Trang chủ", href: "/" },
     { label: "Hướng dẫn", href: "#guidelines" },
-    { label: "Bảng xếp hạng", href: "/leaderboard" },
+    { label: "Bảng xếp hạng", href: "/leaderboard", adminOnly: true },
+    { label: "Kết quả thi", href: "/exam/result", userOnly: true },
   ]
   
   export const AUTH_NAV_ITEMS = {
@@ -45,6 +46,18 @@ export const SITE_CONFIG = {
     "Mỗi câu hỏi chỉ được chọn một đáp án", 
     "Hệ thống sẽ tự động nộp bài khi hết thời gian"
   ] as const;
+  
+  export const EXAM_CONFIG = {
+    DURATION: 30 * 60, // 30 phút (tính bằng giây)
+    MAX_ATTEMPTS: 3,
+    PASS_SCORE: 80,
+    TOTAL_QUESTIONS: 30,
+    REWARDS: {
+      FIRST_PRIZE: 5000000,
+      SECOND_PRIZE: 3000000,
+      THIRD_PRIZE: 1000000
+    }
+  } as const;
   
   export const LOCATION_CONSTANTS = {
     PROVINCE: {

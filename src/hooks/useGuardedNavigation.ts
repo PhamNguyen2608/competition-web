@@ -2,7 +2,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { ExamResultService } from '../services/examResultService';
 import { submitQuiz } from '../features/exam-question/quizSlice';
-import { ParticipantService } from '../services/participantService';
 
 export function useGuardedNavigation() {
   const navigate = useNavigate();

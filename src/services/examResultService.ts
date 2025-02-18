@@ -5,7 +5,7 @@ import { ExamResult } from '../types/exam';
 export class ExamResultService {
   private static readonly COLLECTION_NAME = 'exam_results';
 
-  static async saveResult(data: Omit<ExamResult, 'completedAt' | 'attemptCount'>, duration: number) {
+  static async saveResult(data: Omit<ExamResult, 'completedAt' | 'attemptCount'>, duration: number): Promise<ExamResult> {
     try {
       // Kiểm tra số lần thi
       const results = await this.getUserResults();
@@ -35,6 +35,7 @@ export class ExamResultService {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
 
+      
       const q = query(
         collection(db, this.COLLECTION_NAME), 
         where('userId', '==', user.uid)
@@ -47,7 +48,7 @@ export class ExamResultService {
       throw error;
     }
   }
-
+  
   private static async getAttemptCount(userId: string): Promise<number> {
     const q = query(collection(db, this.COLLECTION_NAME), where('userId', '==', userId));
     const querySnapshot = await getDocs(q);

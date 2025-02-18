@@ -1,4 +1,4 @@
-import { useState,memo, useEffect } from "react"
+import { useState,memo, useEffect, useRef } from "react"
 import { CustomButton } from "../../../components/ui/button"
 import { setCurrentQuestion, setExamResult, submitQuiz } from "../../../features/exam-question/quizSlice"
 import { useAppDispatch, useAppSelector } from "../../../store/hooks"
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { ExamWarningPortal } from "./ExamWarningPortal"
 import { ExamResultService } from "../../../services/examResultService"
 import { store } from "../../../store"
+import { EXAM_CONFIG } from '../../../lib/constants'
 
 interface QuizControlsProps {
   totalQuestions: number
@@ -20,6 +21,7 @@ export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizC
   const dispatch = useAppDispatch()
   const { isSubmitted } = useAppSelector((state) => state.quiz)
   const { user } = useAppSelector((state) => state.auth)
+  const hasAddedParticipant = useRef(false)
 
   const answeredCount = Object.keys(answers).length
 
@@ -32,8 +34,7 @@ export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizC
   }
 
   const handleSubmit = async () => {
-    if (!user) return;
-
+    if (!user || hasAddedParticipant.current) return;
     try {
       dispatch(submitQuiz())
       const state = store.getState().quiz
@@ -41,14 +42,13 @@ export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizC
       const correctCount = state.questions.reduce((count, question) => {
         return state.answers[question.id] === question.correctAnswer ? count + 1 : count;
       }, 0);
-
       const score = state.questions.length > 0 
         ? Math.round((correctCount / state.questions.length) * 100)
         : 0;
       
       const duration = Math.floor((Date.now() - startTime) / 1000);
       
-      await ExamResultService.saveResult({
+      const examResult = await ExamResultService.saveResult({
         score: score,
         correctAnswers: correctCount,
         totalQuestions: state.questions.length,
@@ -58,25 +58,28 @@ export const QuizControls = memo(function QuizControls({ totalQuestions }: QuizC
         duration: duration
       }, duration);
 
-      // Force refresh results
-      const updatedResults = await ExamResultService.getUserResults();
-      const latest = updatedResults.reduce((prev, current) => 
-        current.attemptCount > prev.attemptCount ? current : prev, 
-        updatedResults[0]
-      );
-      dispatch(setExamResult(latest));
+      // After successful submission, set the ref to true
+      hasAddedParticipant.current = true;
+
+      // Dispatch exam result immediately
+      dispatch(setExamResult({
+        score: examResult.score,
+        correctAnswers: examResult.correctAnswers,
+        attemptCount: examResult.attemptCount,
+        duration: examResult.duration
+      }));
+
     } catch (error) {
       console.error('Failed to save exam result:', error)
     }
   }
 
   useEffect(() => {
-    const timeLimit = 45 * 60 * 1000; // 45 phút
     const timeoutId = setTimeout(() => {
       if (!isSubmitted) {
         handleSubmit();
       }
-    }, timeLimit);
+    }, EXAM_CONFIG.DURATION * 1000); // Chuyển sang milliseconds
 
     return () => clearTimeout(timeoutId);
   }, [isSubmitted]);

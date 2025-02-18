@@ -2,7 +2,7 @@ import { memo, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setTimeRemaining, submitQuiz } from "../../../features/exam-question/quizSlice";
 import { ExamResultService } from "../../../services/examResultService";
-import { ParticipantService } from "../../../services/participantService";
+import { ExamStatsService } from "../../../services/examStatsService";
 
 export const QuizTimer = memo(function QuizTimer() {
   const dispatch = useAppDispatch();

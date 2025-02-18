@@ -4,10 +4,10 @@ import { ChevronLeft } from "lucide-react"
 import { Leaderboard } from "../../../components/layout/main/leader-board/leaderboard"
 import { useAppSelector } from "../../../store/hooks"
 import { LeaderboardEntry } from "../../../components/layout/main/leader-board/types"
-import { ParticipantService } from "../../../services/participantService"
+import { ExamStatsService } from "../../../services/examStatsService"
 import "./leaderBoard.css"
 import { TIEU_KHU } from "../../../lib/constants"
-import { LeaderboardParticipant } from "../../../services/participantService"
+import { LeaderboardParticipant } from "../../../services/examStatsService"
 
 export default function LeaderboardPage() {
   const navigate = useNavigate()
@@ -15,13 +15,16 @@ export default function LeaderboardPage() {
   const [totalParticipants, setTotalParticipants] = useState(0)
   const [subDistrictStats, setSubDistrictStats] = useState<Record<string, number>>({})
   const [leaderboard, setLeaderboard] = useState<LeaderboardParticipant[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(0)
+  const ITEMS_PER_PAGE = 10
 
   useEffect(() => {
     let isMounted = true
 
     const fetchTotalParticipants = async () => {
       try {
-        const total = await ParticipantService.getTotalParticipants()
+        const total = await ExamStatsService.getTotalParticipants()
         if (isMounted) {
           setTotalParticipants(total)
         }
@@ -31,14 +34,19 @@ export default function LeaderboardPage() {
     }
 
     const fetchStats = async () => {
-      const stats = await ParticipantService.getParticipantsBySubDistrict()
+      const stats = await ExamStatsService.getParticipantsBySubDistrict()
       setSubDistrictStats(stats)
     }
 
     const fetchLeaderboard = async () => {
-      const data = await ParticipantService.getLeaderboard()
-      if (isMounted) {
-        setLeaderboard(data)
+      try {
+        const { data, total } = await ExamStatsService.getLeaderboard(currentPage, ITEMS_PER_PAGE)
+        if (isMounted) {
+          setLeaderboard(data)
+          setTotalPages(Math.ceil(total / ITEMS_PER_PAGE))
+        }
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error)
       }
     }
 
@@ -50,7 +58,7 @@ export default function LeaderboardPage() {
     return () => {
       isMounted = false
     }
-  }, []) // Có thể thêm dependencies nếu cần refresh data
+  }, [currentPage]) // Re-fetch when page changes
 
   const leaderboardData: LeaderboardEntry[] = leaderboard.map((item, index) => ({
     position: index + 1,
@@ -73,6 +81,41 @@ export default function LeaderboardPage() {
     navigate('/')
     return null
   }
+
+  // Add Pagination component
+  const Pagination = () => (
+    <div className="flex justify-center gap-2 mt-4">
+      <button
+        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+        disabled={currentPage === 1}
+        className="px-3 py-1 rounded bg-gray-100 disabled:opacity-50"
+      >
+        Trước
+      </button>
+      
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+        <button
+          key={page}
+          onClick={() => setCurrentPage(page)}
+          className={`px-3 py-1 rounded ${
+            currentPage === page 
+              ? 'bg-primary text-white' 
+              : 'bg-gray-100'
+          }`}
+        >
+          {page}
+        </button>
+      ))}
+      
+      <button
+        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1 rounded bg-gray-100 disabled:opacity-50"
+      >
+        Sau
+      </button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -117,6 +160,7 @@ export default function LeaderboardPage() {
           {/* Leaderboard Section - Thêm padding nhỏ hơn trên mobile */}
           <div className="p-3 md:p-6">
             <Leaderboard entries={leaderboardData} />
+            <Pagination />
           </div>
 
           <div className="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
@@ -129,9 +173,10 @@ export default function LeaderboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {Object.entries(subDistrictStats)
                   .filter(([, count]) => count > 0)
+                  .sort(([, a], [, b]) => b - a)
                   .slice(0, 3)
                   .map(([district, count], index) => {
-                    const tieuKhuInfo = TIEU_KHU.find(tk => tk.code === district || tk.name === district);
+                    const tieuKhuInfo = TIEU_KHU.find(tk => tk.code === district);
                     const displayName = tieuKhuInfo ? tieuKhuInfo.name : district;
                     const medals = ['🥇', '🥈', '🥉'];
                     
@@ -157,41 +202,45 @@ export default function LeaderboardPage() {
                   })}
               </div>
 
-              {/* Scrollable List */}
+              {/* Scrollable List - Hiển thị tất cả tiểu khu chưa có người tham gia */}
               <div className="max-h-[400px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                {Object.entries(subDistrictStats)
-                  .filter(([, count]) => count >= 0)
-                  .slice(3)
-                  .map(([district, count], index) => {
-                    const tieuKhuInfo = TIEU_KHU.find(tk => tk.code === district);
-                    const displayName = tieuKhuInfo ? tieuKhuInfo.name : district;
-                    
-                    return (
-                      <div 
-                        key={district}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                            <span className="text-gray-600 font-medium">
-                              {index + 4}
-                            </span>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">{displayName}</h4>
-                            <p className="text-sm text-gray-500">
-                              {count} người tham gia
-                            </p>
-                          </div>
+                {TIEU_KHU.map((tk, index) => {
+                  const count = subDistrictStats[tk.code] || 0;
+                  // Chỉ hiển thị những tiểu khu chưa có trong top 3
+                  const isInTop3 = Object.entries(subDistrictStats)
+                    .filter(([, count]) => count > 0)
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 3)
+                    .some(([district]) => district === tk.code);
+
+                  if (isInTop3) return null;
+
+                  return (
+                    <div 
+                      key={tk.code}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-gray-600 font-medium">
+                            {index + 1}
+                          </span>
                         </div>
-                        {count === 0 && (
-                          <div className="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600">
-                            Chưa có người tham gia
-                          </div>
-                        )}
+                        <div>
+                          <h4 className="font-medium text-gray-900">{tk.name}</h4>
+                          <p className="text-sm text-gray-500">
+                            {count} người tham gia
+                          </p>
+                        </div>
                       </div>
-                    );
-                  })}
+                      {count === 0 && (
+                        <div className="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600">
+                          Chưa có người tham gia
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

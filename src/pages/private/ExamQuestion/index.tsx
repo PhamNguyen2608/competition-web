@@ -7,7 +7,7 @@ import { QuizControls } from "../../../components/layout/exam/QuizControls"
 import { useTranslation } from "react-i18next"
 import { QuestionService } from "../../../services/questionService"
 import { setQuestions, setExamResult, submitQuiz } from "../../../features/exam-question/quizSlice"
-import { ExamResult } from "../../../components/layout/exam/ExamResult"
+import  ExamResult  from "../../../components/layout/exam/ExamResult"
 import { ExamResultService } from "../../../services/examResultService"
 
 function QuizPage() {

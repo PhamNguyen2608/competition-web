@@ -5,17 +5,18 @@ import { CustomButton } from '../../ui/button';
 import { ExamResultService } from '../../../services/examResultService';
 import { ExamResult as ExamResultType } from '../../../types/exam';
 import { resetQuiz } from '../../../features/exam-question/quizSlice';
-import { ParticipantService } from '../../../services/participantService';
-import { TIEU_KHU } from '../../../lib/constants';
+import { PredictionPortal } from './PredictionPortal';
+import { PredictionService } from '../../../services/predictionService';
 
-export const ExamResult = () => {
+export default function ExamResult() {
   const { examResult, questions } = useAppSelector((state) => state.quiz);
   const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [allResults, setAllResults] = useState<ExamResultType[]>([]);
   const [hasReachedAttemptLimit, setHasReachedAttemptLimit] = useState(false);
-  const hasAddedParticipant = useRef(false);
+  const [showPredictionPortal, setShowPredictionPortal] = useState(false);
+  const hasPredictedRef = useRef(false);
 
   const getScoreColor = useCallback((score: number) => {
     if (score >= 80) return 'text-green-600';
@@ -24,35 +25,31 @@ export const ExamResult = () => {
   }, []);
 
   useEffect(() => {
-    const checkAttemptLimit = async () => {
+    const checkAttemptAndPrediction = async () => {
       try {
         const results = await ExamResultService.getUserResults();
         setAllResults([...results].sort((a, b) => 
           b.completedAt.toMillis() - a.completedAt.toMillis()
         ));
-        setHasReachedAttemptLimit(results.length >= 3);
+        
+        const hasReachedLimit = results.length >= 3;
+        setHasReachedAttemptLimit(hasReachedLimit);
+        
+        if (hasReachedLimit && !hasPredictedRef.current) {
+          const predicted = await PredictionService.hasPredicted(user?.uid || '');
+          hasPredictedRef.current = predicted;
+          
+          setShowPredictionPortal(!predicted);
+        }
       } catch (error) {
         console.error('Error checking attempt limit:', error);
       }
     };
-    checkAttemptLimit();
-  }, [examResult]);
-
-  useEffect(() => {
-    const addParticipant = async () => {
-      if (examResult && user && !hasAddedParticipant.current) {
-        await ParticipantService.addParticipant({
-          userId: user.uid,
-          name: user.displayName || 'Anonymous', 
-          score: examResult.score,
-          attemptCount: examResult.attemptCount,
-          subDistrict: user.tieuKhu
-        });
-        hasAddedParticipant.current = true;
-      }
-    };
-    addParticipant();
-  }, [examResult, user]);
+    
+    if (user) {
+      checkAttemptAndPrediction();
+    }
+  }, [user, examResult]);
 
   // Cache kết quả bài thi
   const examResultContent = useMemo(() => {
@@ -143,7 +140,7 @@ export const ExamResult = () => {
       
       {examResultContent}
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 justify-center">
         {hasReachedAttemptLimit ? (
           <CustomButton
             disabled={true}
@@ -175,6 +172,13 @@ export const ExamResult = () => {
       </div>
 
       {examHistoryContent}
+
+      {showPredictionPortal && (
+        <PredictionPortal onClose={() => {
+          setShowPredictionPortal(false);
+          hasPredictedRef.current = true;
+        }} />
+      )}
     </div>
   );
 };

@@ -64,8 +64,18 @@ export function Header() {
             />
           </Link>
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
-            {NAV_ITEMS.map((item) => (
-              (item.href === '#leaderboard' && (!user || user.role !== 'admin')) ? null : (
+            {NAV_ITEMS.map((item) => {
+              // Ẩn menu Bảng xếp hạng nếu không phải admin
+              if (item.adminOnly && (!user || user.role !== 'admin')) {
+                return null;
+              }
+              
+              // Ẩn menu Kết quả thi nếu là admin hoặc chưa đăng nhập
+              if (item.userOnly && (!user || user.role === 'admin')) {
+                return null;
+              }
+
+              return (
                 <Link 
                   key={item.href} 
                   to={item.href} 
@@ -74,8 +84,8 @@ export function Header() {
                 >
                   {item.label}
                 </Link>
-              )
-            ))}
+              );
+            })}
             
             <button
               onClick={() => setShowRewards(true)}

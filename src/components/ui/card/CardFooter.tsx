@@ -17,4 +17,4 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
 
 CardFooter.displayName = "CardFooter"
 
-export default {CardFooter}
+export { CardFooter }

@@ -5,6 +5,8 @@ const CACHE_DB_NAME = 'app-cache';
 const CACHE_STORE_NAME = 'assets';
 const QUESTIONS_STORE_NAME = 'questions';
 const QUESTIONS_META_STORE_NAME = 'questions-meta';
+const EXAM_RESULTS_STORE_NAME = 'exam-results';
+const EXAM_RESULTS_META_STORE_NAME = 'exam-results-meta';
 const DB_VERSION = 2;
 
 export const CacheService = {
@@ -20,6 +22,12 @@ export const CacheService = {
         }
         if (!db.objectStoreNames.contains(QUESTIONS_META_STORE_NAME)) {
           db.createObjectStore(QUESTIONS_META_STORE_NAME);
+        }
+        if (!db.objectStoreNames.contains(EXAM_RESULTS_STORE_NAME)) {
+          db.createObjectStore(EXAM_RESULTS_STORE_NAME);
+        }
+        if (!db.objectStoreNames.contains(EXAM_RESULTS_META_STORE_NAME)) {
+          db.createObjectStore(EXAM_RESULTS_META_STORE_NAME);
         }
       },
     });
@@ -80,4 +88,5 @@ export const CacheService = {
       version: meta?.version || 0
     };
   }
+  
 }; 

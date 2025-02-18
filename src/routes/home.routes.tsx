@@ -9,6 +9,7 @@ const HomePage = lazy(() => import('../components/layout/main/MainLayout'));
 const Analytics = lazy(() => import('../components/layout/main/MainLayout'));
 const Reports = lazy(() => import('../components/layout/main/MainLayout'));
 const ExamPage = lazy(() => import('../pages/private/Exam'));
+const ExamResult = lazy(() => import('../components/layout/exam/ExamResult'));
 
 const homeRoutes: RouteObject[] = [
   {
@@ -36,6 +37,10 @@ const homeRoutes: RouteObject[] = [
       {
         path: '/exam/questions',
         element: <ExamQuestionPage />
+      },
+      {
+        path: '/exam/result',
+        element: <ExamResult />
       }
     ]
   }

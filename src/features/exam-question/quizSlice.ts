@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Question, QuizState } from "../../types/question"
+import { EXAM_CONFIG } from '../../lib/constants';
 
 interface SetExamResultPayload {
   score: number;
@@ -11,7 +12,7 @@ interface SetExamResultPayload {
 const initialState: QuizState = {
   currentQuestionId: 1,
   answers: {},
-  timeRemaining: 5, // 5 seconds for testing
+  timeRemaining: EXAM_CONFIG.DURATION,
   isSubmitted: false,
   questions: [],
   loading: true,
@@ -84,14 +85,14 @@ const quizSlice = createSlice({
         score,
         correctAnswers: correctCount,
         attemptCount: state.attemptCount + 1,
-        duration: 45 * 60 - state.timeRemaining
+        duration: EXAM_CONFIG.DURATION - state.timeRemaining
       };
       state.attemptCount = state.attemptCount + 1;
     },
     resetQuiz: (state) => {
       state.currentQuestionId = 1
       state.answers = {}
-      state.timeRemaining = 45 * 60
+      state.timeRemaining = EXAM_CONFIG.DURATION
       state.isSubmitted = false
       state.hasCompletedExam = false
       state.examResult = null
